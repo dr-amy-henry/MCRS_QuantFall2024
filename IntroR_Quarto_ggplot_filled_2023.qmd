@@ -1,0 +1,473 @@
+---
+title: "IntroR_FirstGGplot_2023"
+author: "Dr. Amy Henry"
+last modified: "September 21, 2023"
+format: html
+editor: visual
+---
+
+# Introduction to R, Quarto, and GGplot
+
+October 3, 2023 - MCRS Quantitative Methods
+
+We started out looking at an R Script in our first activity, but I would like you to do a lot of writing your code in Quarto documents, which allow for a lot more notes and easy viewing of your products!
+
+In Quarto, code goes in chunks, like this:
+
+```{r}
+
+#anything in the gray box will get run, so if you put comments in here, they need # comment. 
+
+```
+
+Outside the chunk you can write anything you want.
+
+**To run a line of R code (aka, send it to the Console), you can:**
+
+-   Click the "Run" button in the upper right of the script window
+
+-   Press Cmd + Enter while the cursor is on the line (or highlighted)
+
+**To run a whole chunk:**
+
+-   Click the green "Play" button on the right side of the chunk header.
+
+Command + Alt + I generates a new "chunk". Try it here! (or Ctrl + Alt + I for PC)
+
+When assigning a value to an object, R does not print anything. You can force R to print the value by using parentheses or by typing the object name. Run the lines in the next chunk one at a time to see the difference in the output.
+
+```{r}
+5
+x <- 5
+(x <- 5)
+x
+```
+
+```{r}
+# objects can store more than one value in a one dimensional vector
+my_vector <- c(1,4,5,6,8)
+```
+
+Whole **data frames** can also be assigned to objects. MPG is one that comes built in with the tidyverse package and describes specs of different models of car.
+
+Remember, **packages** are bundles of code and functions that other people have written and shared with us to use. They save us a lot of work, but need to be loaded fresh every time you open R.
+
+```{r}
+# I would like to look at this cool dataset about penguins that I know about, but its not installed yet. 
+penguins
+
+# You only need to install a package once on your computer (like buying a book)
+install.packages("palmerpenguins")
+
+# Each time you reopen R however, you need to call the packages you're using fresh from the library
+library("palmerpenguins")
+
+# Then you can access the data frames and functions stored in the package :) 
+penguins
+
+```
+
+**tidyverse** is a very popular package that we will use functions from a lot, and is actually a collection of packages. One of the packages in it is **ggplot2**, which makes it very easy to make very nice looking plots.
+
+```{r}
+library("tidyverse")
+
+mpg
+
+```
+
+\####################################################
+
+But come on, there's time for all that boring stuff later, you said we could make pretty graphs!
+
+The **fivethirtyeight** package contains data sets written about on the FiveThirtyEight blog. We're going to play with a data set of popular Halloween candies, their characteristics and how popular they are, as assessed in survey data.
+
+```{r}
+library("fivethirtyeight")
+```
+
+What are some ways we can look at this dataset?
+
+```{r}
+candy_rankings
+```
+
+```{r}
+head(candy_rankings)
+```
+
+```{r}
+glimpse(candy_rankings)
+```
+
+```{r}
+View(candy_rankings)
+```
+
+## GGPLOTS: The Basic format
+
+There are three really basic components you need for any ggplot.
+
+1.  the data set
+
+2.  the variables you want on each axis
+
+3.  a "geom" to tell it what kind of plot to make (e.g., boxplot, histogram)
+
+These pieces are layered into the plot with + signs.
+
+What it looks like when you put those things together:
+
+```{r}
+ggplot(<dataset>) + 
+  aes(
+    x = <variable you want on the x-axis from dataset>, 
+    y = <ditto for y>
+      ) + 
+  geom_<typeofplot>(
+    <modifying arguments of that plot>
+      )
+```
+
+Let's do it step by step:
+
+```{r}
+ggplot(candy_rankings) # this line makes the space to put the plot, the background
+```
+
+```{r}
+ggplot(candy_rankings) + 
+  aes(x = chocolate) # this says what to put on the axes
+```
+
+```{r}
+ggplot(candy_rankings) +  
+  aes(x = chocolate) + 
+  geom_bar() # this says what kind of plot to make, in this case, a barplot that automatically did counts of the observations of which candies were chocolate or not chocolate. 
+```
+
+ggplots can be defined as an object and recalled later too. This is useful when you are adding more layers and trying things out, or when you're compiling the plots into a multiple plot figure or exporting them.
+
+```{r}
+chocolate_bar <- ggplot(candy_rankings) +  
+  aes(x = chocolate) + 
+  geom_bar() 
+
+chocolate_bar
+```
+
+Challenge: In the chunk below, plot a different variable, [without copying and pasting the script you wrote before]{.underline}.
+
+```{r}
+
+```
+
+Let's try a different kind of plot.
+
+For example, here we've plotted the win percentage (how often people ranked it in their favorites) against sugar percent, to ask the question, do sweeter candies win more often?
+
+We're using the **geom_point()** function to plot this as a scatter plot.
+
+```{r}
+sweetness <- ggplot(candy_rankings) + 
+  aes(x = sugarpercent, y = winpercent) + 
+  geom_point()
+
+sweetness
+```
+
+To add a best-fit regression line, we can use the **geom_smooth()** function. This function has an **argument** that tells it what kind of line we'd like it to fit - in this case we specified "lm", which stands for "linear model".
+
+```{r}
+sweetness + 
+  geom_smooth(method = "lm")
+```
+
+If we'd like to compare sweetness across a categorical variable, like chocolate or not chocolate, we can use a **box and whisker plot**, generated with **geom_boxplot()**. What question is this plot asking?
+
+```{r}
+sweetness <- ggplot(candy_rankings) + 
+  aes(x = chocolate, y = sugarpercent) + 
+  geom_boxplot()
+sweetness
+```
+
+Finally, let's try making a histogram - this only takes an input argument for the x axis.
+
+```{r}
+sweethist <- ggplot(candy_rankings) + 
+  aes(x = sugarpercent) + 
+  geom_histogram()
+sweethist
+```
+
+## Reference for which geoms/stats to use for which kinds of plots:
+
+Check out your **ggplot2 cheatsheet!** This has a nice visual reference to what geom to use to make what kind of plot.
+
+More detail here, to not worry about yet. https://ggplot2.tidyverse.org/reference/
+
+### Tests:
+
+1.  Are fruity candies cheaper?
+
+-   Can you make a boxplot that shows the price percent depending on fruity?
+
+2.  Are sweeter candies more expensive? Do the candies with higher sugarpercent have higher winpercent? Plot this relationship.
+
+## PRETTY TIME!
+
+### Modifying Colors
+
+Reference: bit.ly/colors-r
+
+You can change the color in the geom argument. Test out how it works on different geoms!
+
+```{r}
+ggplot(candy_rankings) +  
+  aes(x = chocolate) + 
+  geom_bar(color = 'darkblue', fill = 'coral') 
+```
+
+If you want the color to reflect another variable, for example, if there is fruit in the candy too, then you make it a **mapped aesthetic**, or one that refers to some data to assign a visual. In this case, you place the **color** or **fill** argument **inside aes().**
+
+```{r}
+ggplot(candy_rankings) +  
+  aes(x = chocolate, fill = fruity) + 
+  geom_bar(position = position_dodge()) 
+```
+
+### Challenge question: what proportion of candies have BOTH chocolate and caramel?
+
+```{r}
+
+```
+
+### Shapes
+
+Working on a scatterplot and want the points to be different shapes? Easy too!
+
+```{r}
+ggplot(candy_rankings) +
+  aes(x = pricepercent,
+      y = winpercent) +
+  geom_point(shape = 2)
+```
+
+Similarly, you can **map** shape to a variable in the aes() function.
+
+```{r}
+ggplot(candy_rankings) +
+  aes(x = pricepercent,
+      y = winpercent, 
+      shape = chocolate) +
+  geom_point()
+```
+
+### Labels
+
+Pretty self-explanatory here. labs() are added separately from the other plot parameters.
+
+```{r}
+ggplot(candy_rankings) +
+  aes(x = sugarpercent, 
+      y = winpercent) +
+  geom_point() +
+  labs(x = "Sugar Percentage",
+       y = "Win Percentage",
+       title = "Relationship between the dependent and independent variable",
+       subtitle = "for Halloween candies",
+       caption = "Based on an online Survey by FiveThirtyEight")
+
+```
+
+### X and Y axis limits
+
+```{r}
+ggplot(candy_rankings) +
+  aes(x = sugarpercent, 
+      y = winpercent) +
+  geom_point() +
+  xlim(0, 1) +
+  ylim(0, 100)
+```
+
+## Plot Examples
+
+### Bar plot
+
+```{r}
+ggplot(candy_rankings) +
+  aes(x = chocolate) + 
+  geom_bar()
+```
+
+### Histogram
+
+```{r}
+ggplot(candy_rankings) + 
+  aes(x = winpercent) +
+  geom_histogram()
+```
+
+### Density Plot
+
+```{r}
+ggplot(candy_rankings) + 
+  aes(x = winpercent) +
+  geom_density()
+```
+
+### Dot plot
+
+```{r}
+ggplot(candy_rankings) + 
+  aes(x = winpercent) +
+  geom_dotplot()
+```
+
+Note the error message - try adding the argument "binwidth = 3" to the geom_dotplot() line.
+
+### Box and whisker plot
+
+```{r}
+ggplot(candy_rankings) +
+  aes(x = chocolate, 
+      y = winpercent) +
+  geom_boxplot()
+```
+
+### Scatter plot
+
+```{r}
+ggplot(candy_rankings) +
+  aes(x = pricepercent, 
+      y = winpercent) +
+  geom_point()
+```
+
+### Examples of multiple layered plots
+
+```{r}
+ggplot(candy_rankings) +
+  aes(x = pricepercent, 
+      y = winpercent) +
+  geom_point() +
+  geom_smooth()
+```
+
+With a line fitted using the lm() function instead of a smoothed line. Test out what happens when you set "se = TRUE".
+
+```{r}
+ggplot(candy_rankings) +
+  aes(x = pricepercent, 
+      y = winpercent) +
+  geom_point() +
+  geom_smooth(method = "lm", 
+              se = FALSE)
+```
+
+Multiple plots in multiple panes - what happens when you move the . and \~ next to chocolate, like in the commented out line?
+
+```{r}
+ggplot(candy_rankings) +
+  aes(x = sugarpercent,
+      y = winpercent) +
+  geom_point() +
+  facet_grid(.~chocolate)
+  #facet_grid(chocolate~.)
+```
+
+### Complex Examples
+
+```{r}
+load(file = "df5.Rdata")
+
+VisitorGraph <- ggplot(df5) + 
+  aes(x = YearRaw, y = kVis) +
+  geom_point()
+
+VisitorGraph
+```
+
+So that's kind of cool for a first shot, but it is definitely not a finalized graph. Let's start adding levels, and changing the line type, so we can get a graph that's a little nicer.
+
+```{r}
+VisitorGraph2 <- ggplot(df5) + 
+  aes(x = YearRaw, y = kVis) +  
+  # Tells R what data to use
+  
+  geom_point(aes(colour = Code)) + 
+  # Tells ggplot to make a scatterplot graph
+  
+  geom_line(aes(colour = Code)) + 
+  # ...then add to that a line graph
+  
+  ggtitle("California National Parks Visitation\n1950 - 2016") + 
+  # Gives it a title
+  
+  xlab("\nYear") + 
+  # Note that \n just adds a blank line before this label
+  
+  ylab("Thousands of Visitors\n") + 
+  # Again, but after the label
+  
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(), 
+    axis.line = element_line(colour = "black")
+    ) + 
+  # These things all 'clean up' graphic area - remove gridlines, background, etc.
+  
+  scale_x_continuous(
+    breaks = c(1950,1960,1970,1980,1990,2000,2010,2020)
+    ) 
+# Specify where tickmarks should be 
+
+VisitorGraph2
+
+```
+
+Let's try another:
+
+```{r}
+VisBoxplot <- ggplot(df5) + 
+  aes(x = Code, y = kVis) +
+  geom_boxplot(aes(fill = Code)) +
+  theme_bw() +
+  ggtitle("CA National Park Visitation (1950 - 2016)") +
+  xlab("National Park") +
+  ylab("Thousands of Visitors") +
+  scale_x_discrete(
+    breaks = c("CHIS","DEVA","JOTR","KICA",
+               "LAVO","PINN","REDW","SEQU","YOSE"), 
+    labels = c("Channel Islands","Death Valley","Joshua Tree",
+               "Kings Canyon","Lassen Volcanic","Pinnacles",
+               "Redwoods","Sequoia","Yosemite")
+    ) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45)) 
+
+VisBoxplot
+```
+
+## Exercises
+
+Q1: Make a line graph that depicts the number of visitors per year for only Yosemite and Joshua Tree National Parks. Use color and line type to distinguish the two parks.
+
+```{r}
+
+```
+
+Q2: Make a boxplot that compares visitation rates in all parks in 1980 to present.
+
+```{r}
+
+```
+
+Q3: Make a plot using the data of your choosing to show something interesting about either the candy_rankings data or the np_visits data.
+
+```{r}
+
+```
